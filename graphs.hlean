@@ -96,12 +96,34 @@ definition fam {P : fam (ctxext A)} (Q : fam (ctxext P)) : fam (ctxext (subst.ct
     ( λ p, fam.vertex Q ⟨⟨pr1 p, tm.vertex x (pr1 p)⟩, pr2 p⟩)
     ( λ p q e, fam.edge Q ⟨⟨pr1 e, tm.edge x (pr1 e)⟩, pr2 e⟩)
 
+definition tm0 {P : graphs.fam (ctxext A)} (f : tm P) : tm (subst.ctx x P) :=
+  tm.mk
+    ( λ i, tm.vertex f ⟨i, tm.vertex x i⟩)
+    ( λ i j e, tm.edge f ⟨e, tm.edge x e⟩)
+
 definition tm {P : graphs.fam (ctxext A)} {Q : graphs.fam (ctxext P)} (g : tm Q) : tm (subst.fam x Q) :=
   tm.mk
     ( λ p, tm.vertex g ⟨⟨pr1 p, tm.vertex x (pr1 p)⟩, pr2 p⟩)
     ( λ p q e, tm.edge g ⟨⟨pr1 e, tm.edge x (pr1 e)⟩, pr2 e⟩)
 
 end subst
+
+namespace sigma
+-- Sigma graphs
+
+variables {G : ctx} {A : fam G}
+
+-- Using the structure of the graph model, we can define a structure consisting of those graphs which satisfy the rules for dependent pair types.
+structure ax (P : fam (ctxext A)) :=
+  ( intr : fam G)
+  ( cons : tm (wk.ctx P (wk.ctx A intr)))
+  ( ind  : Π {Q : fam (ctxext intr)},
+             tm (subst.ctx cons (wk.fam P (wk.fam A Q))) → tm Q)
+  ( comp : Π {Q : fam (ctxext intr)} (s : tm (subst.ctx cons (wk.fam P (wk.fam A Q)))),
+             subst.tm0 cons (wk.tm P (wk.tm A (ind s))) = s)
+
+
+end sigma
 
 section Types_as_graphs
 -- Types as graphs.

@@ -44,18 +44,33 @@ definition famext (A : fam G) (P : fam (ctxext A)) : fam G :=
 definition Delta (A : Type) : ctx :=
   ctx.mk A (λ x y, x = y)
 
+end graph_in_context
+
 -- Weakening
-section wk
+namespace wk
 
-variable A : fam G
+variable {G : ctx}
+variable (A : fam G)
 
-definition wk.ctx (B : fam G) : fam (ctxext A) :=
+definition ctx (B : fam G) : fam (ctxext A) :=
   fam.mk
     ( λ p, fam.vertex B (pr1 p))
     ( λ p q e, fam.edge B (pr1 e))
 
-end wk
+variable {B : fam G}
 
-end graph_in_context
+definition fam (Q : fam (ctxext B)) : fam (ctxext (wk.ctx A B)) :=
+  fam.mk
+    ( λ p, fam.vertex Q ⟨pr1 (pr1 p),pr2 p⟩)
+    ( λ p q e, fam.edge Q ⟨(pr1 (pr1 e)),pr2 e⟩)
+
+variable {Q : graphs.fam (ctxext B)}
+
+definition tm (g : graphs.tm Q) : tm (wk.fam A Q) :=
+  tm.mk
+    ( λ p, tm.vertex g (⟨pr1 (pr1 p),pr2 p⟩))
+    ( λ p q e, tm.edge g (⟨pr1 (pr1 e),pr2 e⟩))
+
+end wk
 
 end graphs

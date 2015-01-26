@@ -19,7 +19,7 @@ structure tm {G : ctx} (A : fam G) :=
   ( vertex : Π(i : ctx.vertex G), fam.vertex A i)
   ( edge : Π{i j : ctx.vertex G}, Π(e : ctx.edge G i j), fam.edge A e (vertex i) (vertex j))
 
-section graph_in_context
+section extension
 
 variable {G : ctx}
 
@@ -40,11 +40,7 @@ definition famext (A : fam G) (P : fam (ctxext A)) : fam G :=
         Σ (f : fam.edge A e (pr1 p) (pr1 q)),
           fam.edge P ⟨e,f⟩ (pr2 p) (pr2 q))
 
--- Types as graphs.
-definition Delta (A : Type) : ctx :=
-  ctx.mk A (λ x y, x = y)
-
-end graph_in_context
+end extension
 
 -- Weakening
 namespace wk
@@ -72,5 +68,13 @@ definition tm (g : graphs.tm Q) : tm (wk.fam A Q) :=
     ( λ p q e, tm.edge g (⟨pr1 (pr1 e),pr2 e⟩))
 
 end wk
+
+section Types_as_graphs
+-- Types as graphs.
+
+definition Delta (A : Type) : ctx :=
+  ctx.mk A (λ x y, x = y)
+
+end Types_as_graphs
 
 end graphs

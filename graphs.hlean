@@ -1,7 +1,7 @@
 open sigma eq
 
 namespace graphs
--- We will define all the ingredients of the graph model of type theory
+-- We begin by defining the fundamental structure of the graph model
 
 -- The context in the graph model are the graphs themselves
 structure ctx :=
@@ -9,8 +9,7 @@ structure ctx :=
   ( edge : vertex → vertex → Type)
 
 -- The families in the graph model are families of graphs
-structure fam (G : ctx)
-  :=
+structure fam (G : ctx) :=
   ( vertex : ctx.vertex G → Type)
   ( edge : Π{i j : ctx.vertex G}, ctx.edge G i j → vertex i → vertex j → Type)
 
@@ -20,6 +19,7 @@ structure tm {G : ctx} (A : fam G) :=
   ( edge : Π{i j : ctx.vertex G}, Π(e : ctx.edge G i j), fam.edge A e (vertex i) (vertex j))
 
 section extension
+-- The graph model is an extension algebra
 
 variable {G : ctx}
 
@@ -42,8 +42,8 @@ definition famext (A : fam G) (P : fam (ctxext A)) : fam G :=
 
 end extension
 
--- Weakening
 namespace wk
+-- The graph model is a weakening algebra
 
 variable {G : ctx}
 variable (A : fam G)
@@ -68,6 +68,40 @@ definition tm (g : graphs.tm Q) : tm (wk.fam A Q) :=
     ( λ p q e, tm.edge g (⟨pr1 (pr1 e),pr2 e⟩))
 
 end wk
+
+namespace proj
+-- The graph model is a projection algebra
+
+variables {G : ctx} {A : fam G}
+
+definition idm : tm (wk.ctx A A) :=
+  tm.mk
+    ( λ p, pr2 p)
+    ( λ p q e, pr2 e)
+
+end proj
+
+namespace subst
+-- The graph model is a substitution algebra
+
+variables {G : ctx} {A : fam G} (x : tm A)
+
+definition ctx (P : fam (ctxext A)) : fam G :=
+  fam.mk
+    ( λ i, fam.vertex P ⟨i, tm.vertex x i⟩)
+    ( λ i j e, fam.edge P ⟨e, tm.edge x e⟩)
+
+definition fam {P : fam (ctxext A)} (Q : fam (ctxext P)) : fam (ctxext (subst.ctx x P)) :=
+  fam.mk
+    ( λ p, fam.vertex Q ⟨⟨pr1 p, tm.vertex x (pr1 p)⟩, pr2 p⟩)
+    ( λ p q e, fam.edge Q ⟨⟨pr1 e, tm.edge x (pr1 e)⟩, pr2 e⟩)
+
+definition tm {P : graphs.fam (ctxext A)} {Q : graphs.fam (ctxext P)} (g : tm Q) : tm (subst.fam x Q) :=
+  tm.mk
+    ( λ p, tm.vertex g ⟨⟨pr1 p, tm.vertex x (pr1 p)⟩, pr2 p⟩)
+    ( λ p q e, tm.edge g ⟨⟨pr1 e, tm.edge x (pr1 e)⟩, pr2 e⟩)
+
+end subst
 
 section Types_as_graphs
 -- Types as graphs.
